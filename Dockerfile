@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Configuration de l'environnement de travail
-WORKDIR /var/www/hhtml
+WORKDIR /var/www/html
 COPY . .
 RUN composer install --no-dev --optimize-autoloader
 

@@ -1,44 +1,50 @@
-version: '3.9'
-
+version: "3.8"
 services:
-    app:
-        build: .
-        container_name: laravel_app_devops
-        restart: unless-stopped
+    jenkins:
+        image: jenkins/jenkins:lts
+        container_name: jenkins
+        ports:
+            - "8080:8080"
+            - "50000:50000"
         volumes:
-            - .:/var/www/html
-        depends_on:
-            - postgres
-        networks:
-            - laravel_network
+            - ./jenkins_home:/var/jenkins_home
+        restart: always
 
-    postgres:
-        image: postgres:15
-        container_name: postgres_db
-        restart: unless-stopped
+    # //3303dff5959641250a8b46853270777d2344abdf435ce3516a566c00dc2491b1 jenkins network id
+    sonarqube:
+        container_name: sonarqube
+        image: sonarqube
+        depends_on:
+            - sonarqube-database
         environment:
-            POSTGRES_DB: gestion_reservation_l3gl
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: mamitaatigh
-        ports:
-            - "5432:5432"
-        networks:
-            - laravel_network
-
-    nginx:
-        image: nginx:latest
-        container_name: nginx_server
-        restart: unless-stopped
-        ports:
-            - "80:80"
+            - SONARQUBE_JDBC_USERNAME=sonarqube
+            - SONARQUBE_JDBC_PASSWORD=sonarpass
+            - SONARQUBE_JDBC_URL=jdbc:postgresql://sonarqube-database:5432/sonarqube
         volumes:
-            - .:/var/www/html
-            - ./nginx.conf:/etc/nginx/nginx.conf
-        depends_on:
-            - app
-        networks:
-            - laravel_network
+            - sonarqube_conf:/opt/sonarqube/conf
+            - sonarqube_data:/opt/sonarqube/data
+            - sonarqube_extensions:/opt/sonarqube/extensions
+            - sonarqube_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+        ports:
+            - 9000:9000
 
-networks:
-    laravel_network:
-        driver: bridge
+    sonarqube-database:
+        container_name: sonarqube-database
+        image: postgres:12
+        environment:
+            - POSTGRES_DB=sonarqube
+            - POSTGRES_USER=sonarqube
+            - POSTGRES_PASSWORD=sonarpass
+        volumes:
+            - sonarqube_database:/var/lib/postgresql
+            - sonarqube_database_data:/var/lib/postgresql/data
+        ports:
+            - 5432:5432
+
+volumes:
+    sonarqube_database_data:
+    sonarqube_bundled-plugins:
+    sonarqube_conf:
+    sonarqube_data:
+    sonarqube_database:
+    sonarqube_extensions:
