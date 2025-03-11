@@ -2,13 +2,14 @@ pipeline {
     agent any
 
     environment {
+        GIT_CREDENTIALS = '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'
         IMAGE_NAME = 'laravel-app'
     }
 
     stages {
         stage('Recuperation du code') {
             steps {
-                git branch: 'main', url: 'https://github.com/SarrMohamed/gestionreservations.git'
+                git credentialsId: GIT_CREDENTIALS,  url: 'https://github.com/SarrMohamed/gestionreservations.git'
             }
         }
 
