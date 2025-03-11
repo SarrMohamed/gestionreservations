@@ -15,14 +15,20 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'composer install --no-dev --optimize-autoloader'
-                sh 'npm install && npm run build'
+                sh 'composer install'
+                sh 'npm install'
             }
         }
 
         stage('Run Unit Tests') {
             steps {
                 sh 'php artisan test'
+            }
+        }
+
+        stage('Analyse Sonarqube') {
+            steps {
+                sh 'sonar-scanner'
             }
         }
 
